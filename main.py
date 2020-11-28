@@ -94,6 +94,7 @@ def get_doc_paragraphs(path):
     tree = XML(xml_content)
 
     paragraphs = []
+    block = []
     print_next = 0
     for paragraph in tree.iter(PARA):
         for node in paragraph.iter(TEXT):
@@ -103,10 +104,29 @@ def get_doc_paragraphs(path):
                 print_next -= 1
             """
 
+            """
             if re.match(r'/?[0-9]{5,}/?', node.text):
                 print('reg_num', node.text)
+            """
             # желательно распознавать что за номер по слову перед номером
 
+            """
+            if re.findall(r'[А-ЯЁ][а-яё]+[ ]+[А-ЯЁ]{2}[ \t\n\r.?!/$]+', node.text):
+                print('FIO_short_double', re.findall(r'[А-ЯЁ][а-яё]+[ ]+[А-ЯЁ]{2}[ \t\n\r.?!$]+', node.text), node.text)
+            elif re.findall(r'[А-ЯЁ][а-яё]+\s+[А-ЯЁ]{1}[.]?[ ]+[А-ЯЁ]{1}[.]?[ \t\n\r.?!$]+', node.text):
+                print('FIO_short_with_space', re.findall(r'[А-ЯЁ][а-яё]+\s+[А-ЯЁ]{1}[.]?[ ]+[А-ЯЁ]{1}[.]?[ \t\n\r.?!$]+', node.text), node.text)
+            elif re.findall(r'[А-ЯЁ][а-яё]+\s+[А-ЯЁ]{1}[.]?[А-ЯЁ]{1}[.]?[ \t\n\r.?!$]+', node.text):
+                print('FIO_short_without_space',  re.findall(r'[А-ЯЁ][а-яё]+\s+[А-ЯЁ]{1}[.]?[А-ЯЁ]{1}[.]?[ \t\n\r.?!$]+', node.text), node.text)
+            elif re.findall(r'[А-ЯЁ][а-яё\-]+[ ]+[А-ЯЁ][а-яё\-]+[ ]*[А-ЯЁ][а-яё\-]+', node.text):
+                print('FIO_full', re.findall(r'[А-ЯЁ][а-яё\-]+[ ]+[А-ЯЁ][а-яё\-]+[ ]*[А-ЯЁ][а-яё\-]+', node.text), node.text)
+            elif re.findall(r'[А-ЯЁ]{2}[ ]+[А-ЯЁ][а-яё]+[ \t\n\r.?!S]', node.text):
+                print('IOF_short_double', re.findall(r'[А-ЯЁ]{2}[ ]+[А-ЯЁ][а-яё]+[ \t\n\r.?!S]', node.text))
+            elif re.findall(r'[А-ЯЁ][.][ ]+[А-ЯЁ][.][ ][А-ЯЁ][а-яё]+[ \t\n\r.?!$]', node.text):
+                print('IOF_short_with_space', re.findall(r'[А-ЯЁ][.][ ]+[А-ЯЁ][.][ ][А-ЯЁ][а-яё]+[ \t\n\r.?!$]', node.text))
+            elif re.findall(r'[А-ЯЁ][.][А-ЯЁ][.][ ][А-ЯЁ][а-яё]+[ \t\n\r.?!$]', node.text):
+                print('IOF_short_without_space', re.findall(r'[А-ЯЁ][.][А-ЯЁ][.][ ][А-ЯЁ][а-яё]+[ \t\n\r.?!$]', node.text))
+            """
+            """
             if re.match(r'\d{2}[.]\d{2}[.]\d{2,4}[ -г. ]+\d{2}[.]\d{2}[.]\d{2,4} \w+', node.text) or \
                     re.match(r'\d{2}[.]\d{2}[.]\d{2,4}[ г.]?\d{0,2}:?\d{0,2}[ -]+\d{0,2}:?\d{0,2} \w+', node.text):
                 print('fact_of_treatment', node.text)
@@ -123,13 +143,71 @@ def get_doc_paragraphs(path):
             elif re.match(r'\d{2}[.]\d{2}[.]\d{2,4}', node.text):
                 print("date", node.text)
                 print_next = 2
-            elif re.match(r'\d{2}.\d{2}.\d{2-4}', node.text):
+            elif re.match(r'\d{2}.\d{2}.\d{2,4}', node.text):
                 print('time or missed date', node.text)
-
-            if re.match(r'Этаж', node.text):
+            """
+            """
+            if re.findall(r'Этаж|этаж|(\d{1,2}эт)', node.text):
+                print('floor', node.text)
+                print_next = 1
+            """
+            """
+            if re.match(r'Эпидномер', node.text):
                 print('word_matching', node.text)
                 print_next = 1
-            paragraphs.append([node.text])
+            """
+            word_matching_list = {'sex': r'[Пп]ол[: ]? \w+\b',
+                                  'age': r'[Вв]озраст[: ]? \d{1,3}лет',
+                                  'years_old': r'\d{1,3}[ ]?год[а]?[ ]?\d{0,2}[ ]?[месяц]?[ев]?[ ]?\d{0,2}',
+                                  'birth_place': r'[Мм]есто рождения[: ]? .*',
+                                  'person': r'личность[: ]? .*',
+                                  'registration': r'[Рр]егистраци.[: ]? .*',
+                                  'insurance': r'страхов.+[: ]? .*',
+                                  'document': r'(СНИЛС|ИНН|[Пп]аспорт)[: ]? .*',
+                                  'nationality': r'[Гг]ражданство[: ]? .*',
+                                  'family_status': r'[Сс]емейное положение[: ]? (замужем|женат)',
+                                  'income': r'[Дд]оход[: ]? .*',
+                                  'living_place': r'[Мм]есто жительства[: ]? .*',
+                                  'phone': r'[Тт]елефон[у]?[:\s]+\d{3,}\b',
+                                  'email': r'[A-z\w]@[A-z].[a-z]',
+                                  'floor1': r'(\d? Этаж \d?)',
+                                  'floor2': r'(\d? этаж \d?.*$)',
+                                  'floor3': r'(\d{1,2}эт)',
+                                  'reg_num': r'/?[0-9]{5,}/?',
+                                  'alphanumeric_code': r'[A-ZА-Я]\d{4,}',
+                                  # 'alphanumeric_code2': r'[A-ZА-Я]?\d+[A-ZА-Я]+\d+[A-ZА-Я]+)',
+                                  # 'period': r'\d{2}[.]\d{2}[.]\d{2,4}[ -]+\d{2}[.]\d{2}.\d{2}',
+                                  'date': r'\d{2}[.]\d{2}[.]\d{2,4}',
+                                  'date_time': r'\d{2}[.]\d{2}[.]\d{2,4}[ г.]?[ ]?\d{0,2}?[:]?\d{0:2}?',
+                                  'FIO_short_double': r'[А-ЯЁ][а-яё]+[ ]+[А-ЯЁ]{2}[ \t\n\r.?!/$]+',
+                                  'FIO_short_with_space': r'[А-ЯЁ][а-яё]+\s+[А-ЯЁ]{1}[.]?[ ]+[А-ЯЁ]{1}[.]?[ \t\n\r.?!$]+',
+                                  'FIO_short_without_space': r'[А-ЯЁ][а-яё]+\s+[А-ЯЁ]{1}[.]?[А-ЯЁ]{1}[.]?[ \t\n\r.?!$]+',
+                                  'FIO_full': r'[А-ЯЁ][а-яё\-]+[ ]+[А-ЯЁ][а-яё\-]+[ ]*[А-ЯЁ][а-яё\-]+'
+                                  }
+            block_separators = {
+                                  '2slash1': r'[\w -]+ /+ \d{2}[.]\d{2}[.]\d{2,4} \d{0,2}[:.]?\d{0,2}[ ]?/+ [\w -]+',
+                                  '2slash2': r'\d{2}[.]\d{2}[.]\d{2,4} \d{0,2}[:.]?\d{0,2}[ ][/][ \w]+[/][ \w]+',
+                                  '1slash': r'\d{2}[.]\d{2}[.]\d{2,4} \d{0,2}[:.]?\d{0,2}[ ]?/+'
+                                  }
+            for i in block_separators:
+                expression = block_separators[i]
+                if re.findall(expression, node.text):
+                    paragraphs.append(block)
+                    block = []
+
+            for i in word_matching_list.keys():
+                expression = word_matching_list[i]
+                new_node = re.sub(expression, '<'+i+'>', node.text)
+                node_matches = re.findall(expression, node.text)
+                node.text = new_node
+
+                if len(node_matches) > 0:
+                    print(i, node_matches, node.text)
+                    print(new_node)
+
+            block.append(node.text)
+    if len(block) > 0:
+        paragraphs.append(block)
     return paragraphs
 
 
@@ -139,6 +217,9 @@ print(len(text))
 # print(text[0:1000])
 
 paragraphs = get_doc_paragraphs(docx_path)
-# print(paragraphs)
+print(len(paragraphs))
+
+for i in paragraphs:
+    print(i)
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
