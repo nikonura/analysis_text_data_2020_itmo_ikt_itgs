@@ -7,9 +7,9 @@ import zipfile
 import re
 
 
-# doc_path = "/home/nikon-cook/Documents/МИТМО/Analisys_TD/Med_karta_1_bez_personalnykh_dannykh.doc"
-# docx_path = "/home/nikon-cook/Documents/МИТМО/Analisys_TD/Med_karta_1_bez_personalnykh_dannykh.docx"
-docx_path = "Med_karta_1_bez_personalnykh_dannykh.docx"
+doc_path = "/home/nikon-cook/Documents/МИТМО/Analisys_TD/Med_karta_1_bez_personalnykh_dannykh.doc"
+docx_path = "/home/nikon-cook/Documents/МИТМО/Analisys_TD/Med_karta_1_bez_personalnykh_dannykh.docx"
+# docx_path = "Med_karta_1_bez_personalnykh_dannykh.docx"
 
 
 doc = docx.Document(docx_path)
@@ -95,23 +95,28 @@ def get_doc_paragraphs(path):
 						# 'alphanumeric_code2': r'[A-ZА-Я]?\d+[A-ZА-Я]+\d+[A-ZА-Я]+)',
 						# 'period': r'\d{2}[.]\d{2}[.]\d{2,4}[ -]+\d{2}[.]\d{2}.\d{2}',
 
-						'time_full': r'\d{2}[:]\d{2}[:]\d{2}',
-						# 'date_time': r'\d{2}[.]\d{2}[.]\d{2,4}[ ]?\d{2}[:]\d{2}',
+						'date_time': r'\d{2}[.]\d{2}[.]\d{2,4}[ ]?\d{1,2}[:]\d{2}[:]?\d{2}?',
 						'date': r'\d{2}[.]\d{2}[.]\d{2,4}',
-						'time': r'\d{2}[:]\d{2}',
-						'date_or_time_short': r'(с|от|на) \d{2}[.]\d{2}',
+						'time_full': r'\d{1,2}[:]\d{2}[:]\d{2}',
+						'time': r'\d{1,2}[:]\d{2}',
+						'nums_with_separator': r'\d{1,3}.\d{1,3}',
 						'blood_pressure': r'\d{2,3}[\\]?[/]?\d{2,3} мм [рp]т[.]?[ ]?[сc]т[.]?',
 
 						'FIO_short_double': r'[А-ЯЁ][а-яё]+[ ]+[А-ЯЁ]{2}[ \t\n\r.?!/$]+',
 						'FIO_short_with_space': r'[А-ЯЁ][а-яё]+\s+[А-ЯЁ]{1}[.]?[ ]+[А-ЯЁ]{1}[.]?[ \t\n\r.?!$]+',
 						'FIO_short_without_space': r'[А-ЯЁ][а-яё]+\s+[А-ЯЁ]{1}[.]?[А-ЯЁ]{1}[.]?[ \t\n\r.?!$]+',
-						'FIO_full': r'[А-ЯЁ][а-яё\-]+[ ]+[А-ЯЁ][а-яё\-]+[ ]*[А-ЯЁ][а-яё\-]+'
+						'FIO_full': r'[А-ЯЁ][а-яё\-]+[ ]+[А-ЯЁ][а-яё\-]+[ ]*[А-ЯЁ][а-яё\-]+',
+						'abbreviation': r'[ ,.][А-ЯЁA-Z]{3,4}\b',
 						}
 
 	block_separators = {
 						'2slash1': r'[\w -]+ /+ \d{2}[.]\d{2}[.]\d{2,4} \d{0,2}[:.]?\d{0,2}[ ]?/+ [\w -]+',
 						'2slash2': r'\d{2}[.]\d{2}[.]\d{2,4} \d{0,2}[:.]?\d{0,2}[ ][/][ \w]+[/][ \w]+',
-						'1slash': r'\d{2}[.]\d{2}[.]\d{2,4} \d{0,2}[:.]?\d{0,2}[ ]?/+'
+						'1slash': r'\d{2}[.]\d{2}[.]\d{2,4} \d{0,2}[:.]?\d{0,2}[ ]?/+',
+						'capital_letters4': r'[А-ЯЁ]+\b[ ]?[А-ЯЁ]+\b[ ]+[А-ЯЁ]+\b[ ]+[А-ЯЁ]+\b',
+						'capital_letters3': r'[А-ЯЁ]{5,}\b[ ]?[А-ЯЁ]+\b[ ]?[А-ЯЁ]{5,}\b',
+						'capital_letters2': r'[А-ЯЁ]{5,}\b[ ]?[А-ЯЁ]{5,}\b',
+						'capital_letters1': r'^[А-ЯЁ]{5,}\b$',
 						}
 
 	for paragraph in tree.iter(PARA):
@@ -120,7 +125,8 @@ def get_doc_paragraphs(path):
 			for i in block_separators:
 				expression = block_separators[i]
 				if re.findall(expression, node.text):
-					paragraphs.append(block)
+					if len(block) > 0:
+						paragraphs.append(block)
 					block = []
 
 			for i in word_matching_list.keys():
@@ -133,8 +139,8 @@ def get_doc_paragraphs(path):
 					if len(node_matches) > 0:
 						# if i in ('blood_pressure', ''):  # убрать в результате, это проверка
 							print(i, node_matches, node.text)
-							print(new_node)
-							print()
+							#print(new_node)
+							#print()
 
 			block.append(node.text)
 	if len(block) > 0:
