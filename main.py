@@ -7,7 +7,6 @@ import zipfile
 import re
 
 
-doc_path = "/home/nikon-cook/Documents/МИТМО/Analisys_TD/Med_karta_1_bez_personalnykh_dannykh.doc"
 docx_path = "/home/nikon-cook/Documents/МИТМО/Analisys_TD/Med_karta_1_bez_personalnykh_dannykh.docx"
 # docx_path = "Med_karta_1_bez_personalnykh_dannykh.docx"
 
@@ -20,22 +19,20 @@ for i in styles:
 print(type(doc))
 
 
-def getText(filename):
-	doc = docx.Document(filename)
-	fullText = []
-	for para in doc.paragraphs:
-		fullText.append(para.text)
-	return '\n'.join(fullText)
+# def getText(filename):
+# 	doc = docx.Document(filename)
+# 	fullText = []
+# 	for para in doc.paragraphs:
+# 		fullText.append(para.text)
+# 	return '\n'.join(fullText)
 
+# file_context = getText(docx_path)
+# print(len(file_context))
+# print()
 
-file_context = getText(docx_path)
-print(len(file_context))
-print()
-
-
-def para2text(p):
-	rs = p._element.xpath('.//w:t')
-	return u" ".join([r.text for r in rs])
+# def para2text(p):
+# 	rs = p._element.xpath('.//w:t')
+# 	return u" ".join([r.text for r in rs])
 
 
 WORD_NAMESPACE = '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}'
@@ -44,22 +41,18 @@ TEXT = WORD_NAMESPACE + 't'
 
 
 def get_docx_text(path):
-	"""
-	Take the path of a docx file as argument, return the text in unicode.
-	"""
+	""" Take the path of a docx file as argument, return the text in unicode. """
 	document = zipfile.ZipFile(path)
 	xml_content = document.read('word/document.xml')
 	document.close()
 	tree = XML(xml_content)
-
 	paragraphs = []
-	for paragraph in tree.getiterator(PARA):
+	for paragraph in tree.iter(PARA):
 		texts = [node.text
-				 for node in paragraph.getiterator(TEXT)
+				 for node in paragraph.iter(TEXT)
 				 if node.text]
 		if texts:
 			paragraphs.append(''.join(texts))
-
 	return '\n\n'.join(paragraphs)
 
 
@@ -68,7 +61,6 @@ def get_doc_paragraphs(path):
 	xml_content = document.read('word/document.xml')
 	document.close()
 	tree = XML(xml_content)
-
 	paragraphs = []
 	block = []
 	print_next = 0
@@ -94,14 +86,12 @@ def get_doc_paragraphs(path):
 						'alphanumeric_code': r'[A-ZА-Я]\d{4,}',
 						# 'alphanumeric_code2': r'[A-ZА-Я]?\d+[A-ZА-Я]+\d+[A-ZА-Я]+)',
 						# 'period': r'\d{2}[.]\d{2}[.]\d{2,4}[ -]+\d{2}[.]\d{2}.\d{2}',
-
 						'date_time': r'\d{2}[.]\d{2}[.]\d{2,4}[ ]?\d{1,2}[:]\d{2}[:]?\d{2}?',
 						'date': r'\d{2}[.]\d{2}[.]\d{2,4}',
 						'time_full': r'\d{1,2}[:]\d{2}[:]\d{2}',
 						'time': r'\d{1,2}[:]\d{2}',
 						'nums_with_separator': r'\d{1,3}.\d{1,3}',
 						'blood_pressure': r'\d{2,3}[\\]?[/]?\d{2,3} мм [рp]т[.]?[ ]?[сc]т[.]?',
-
 						'FIO_short_double': r'[А-ЯЁ][а-яё]+[ ]+[А-ЯЁ]{2}[ \t\n\r.?!/$]+',
 						'FIO_short_with_space': r'[А-ЯЁ][а-яё]+\s+[А-ЯЁ]{1}[.]?[ ]+[А-ЯЁ]{1}[.]?[ \t\n\r.?!$]+',
 						'FIO_short_without_space': r'[А-ЯЁ][а-яё]+\s+[А-ЯЁ]{1}[.]?[А-ЯЁ]{1}[.]?[ \t\n\r.?!$]+',
