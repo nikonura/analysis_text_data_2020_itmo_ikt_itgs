@@ -3,6 +3,7 @@ import re
 
 
 def algorithm(cell, block_separators, block, paragraphs, word_matching_list):
+	# print('\n', cell.text)  # для демонстрации
 	for i in block_separators:
 		expression = block_separators[i]
 		if re.findall(expression, cell.text):
@@ -13,6 +14,7 @@ def algorithm(cell, block_separators, block, paragraphs, word_matching_list):
 		expression = word_matching_list[i]
 		node_matches = re.findall(expression, cell.text)
 		if len(node_matches) > 0:
+			# print(i, node_matches)  # для демонстрации
 			for j in range(len(node_matches)):
 				cell.text = cell.text.replace(node_matches[j], '<'+i+'>')
 	block.append(cell.text)
@@ -24,18 +26,18 @@ def get_doc_paragraphs(path, save_path):
 	paragraphs = []
 	block = []
 
-	word_matching_list = {'sex': r'[Пп]ол[: ]? \w+\b',
-						'age': r'[Вв]озраст[: ]? \d{1,3}лет',
-						'years_old': r'\d{1,3}[ ]?год[а]?[ ]?\d{0,2}[ ]?[месяц]?[ев]?[ ]?\d{0,2}',
+	word_matching_list = {'sex': r'\b[Пп]ол[: ]? \w+\b',
+						'years_old': r'\d{1,3}[ ]?[гл][ое][дт][а]?|\d{1,2}[ ]?месяц[е]?[в]?',
+						'age': r'[Вв]озраст[: ]? \d{1,3}',
 						'birth_place': r'[Мм]есто рождения[: ]? .*',
 						'person': r'личность[: ]? .*',
 						'registration': r'[Рр]егистраци.[: ]? .*',
 						'insurance': r'страхов.+[: ]? .*',
-						'document': r'(СНИЛС|ИНН|[Пп]аспорт)[: ]? .*',
+						'document': r'(СНИЛС[: ]? .*|ИНН[: ]? .*|[Пп]аспорт[: ]? .*)',
 						'nationality': r'[Гг]ражданство[: ]? .*',
 						'family_status': r'[Сс]емейное положение[: ]? (замужем|женат)',
 						'income': r'[Дд]оход[: ]? .*',
-						'living_place': r'[Мм]есто жительства[: ]? .*',
+						'living_place': r'[Мм]есто жительства[: ]? .*|[Аа]дрес.[: ]? .*',
 						'phone': r'[Тт]елефон[у]?[:\s]+\d{3,}\b',
 						'email': r'[A-z\w]@[A-z].[a-z]',
 						'floor1': r'(\d? Этаж \d?)',
@@ -46,16 +48,16 @@ def get_doc_paragraphs(path, save_path):
 						# 'alphanum_code2': r'[A-ZА-Я]?\d+[A-ZА-Я]+\d+[A-ZА-Я]+)',
 						# 'period': r'\d{2}[.]\d{2}[.]\d{2,4}[ -]+\d{2}[.]\d{2}.\d{2}',
 						# 'date_time': r'\d{2}[.]\d{2}[.]\d{2,4}[ ]?\d{1,2}[:]\d{2}[:]?\d{2}?',
-						'date': r'\d{2}[.]\d{2}[.]\d{2,4}',
+						'date': r'\d{1,2}[.]\d{2}[.]\d{2,4}',
 						'time_full': r'\d{1,2}[:]\d{2}[:]\d{2}',
 						'time': r'\d{1,2}[:]\d{2}',
 						'blood_pressure': r'\d{2,3}[\\]?[/]?\d{2,3} мм [рp]т[.]?[ ]?[сc]т[.]?',
-						'nums_with_sep': r'\d{1,3}\.\d{1,3}',
+						# 'nums_with_sep': r'\d{1,3}\.\d{1,3}',
 						'FIO_short_double': r'[А-ЯЁ][а-яё]+[ ]+[А-ЯЁ]{2}[ \t\n\r.?!/$]+',
 						'FIO_short_with_space': r'[А-ЯЁ][а-яё]+\s+[А-ЯЁ]{1}[.]?[ ]+[А-ЯЁ]{1}[.]?[ \t\n\r.?!$]+',
 						'FIO_short_without_space': r'[А-ЯЁ][а-яё]+\s+[А-ЯЁ]{1}[.]?[А-ЯЁ]{1}[.]?[ \t\n\r.?!$]+',
 						'FIO_full': r'[А-ЯЁ][а-яё\-]+[ ]+[А-ЯЁ][а-яё\-]+[ ]*[А-ЯЁ][а-яё\-]+',
-						'abbreviation': r'[ ,.][А-ЯЁA-Z]{3,4}\b',
+						# 'abbreviation': r'[ ,.][А-ЯЁA-Z]{3,4}\b',
 						'place': r'>.+ Минздрава России'
 						}
 
@@ -96,6 +98,9 @@ def get_doc_paragraphs(path, save_path):
 		paragraphs.append(block)
 
 	# Update body
+	if len(document.paragraphs)!=0:
+		for para in document.paragraphs:
+			block, paragraphs = algorithm(para, block_separators, block, paragraphs, word_matching_list)
 	texts = document._element.xpath('//w:t')
 	for n in range(len(texts)):
 		block, paragraphs = algorithm(texts[n], block_separators, block, paragraphs, word_matching_list)
@@ -106,15 +111,29 @@ def get_doc_paragraphs(path, save_path):
 	return paragraphs
 
 
+# filename options
+# option = "Med_karta_1_bez_personalnykh_dannykh"
+option = "Med_karta_2"
+
 # docx_path = "/home/nikon-cook/Documents/МИТМО/Analisys_TD/Med_karta_1_bez_personalnykh_dannykh.docx"
 # save_path = "/home/nikon-cook/Documents/МИТМО/Analisys_TD/Med_karta_1_bez_personalnykh_dannykh_new.docx"
-docx_path = "Med_karta_1_bez_personalnykh_dannykh.docx"
-save_path = "Med_karta_1_bez_personalnykh_dannykh_new.docx"
-# docx_path = "medical_record.docx"
-# save_path = "medical_record_new.docx"
+docx_path = option + ".docx"
+save_path = option + "_new.docx"
 
+# Параграфы
 paragraphs = get_doc_paragraphs(docx_path, save_path)
-print(len(paragraphs))
+print('\nParagraphs cnt:', len(paragraphs))
 
 # for i in paragraphs:
 # 	print(i)
+
+# F-мера для карты 2
+tp = 34
+fp = 1
+fn = 2
+recall = tp / (tp + fn)
+precision = tp / (tp + fp)
+f_score = 2 * precision * recall / (precision + recall)
+print('Recall:', recall)
+print('Precision:', precision)
+print('F-мера:', f_score)
