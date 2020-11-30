@@ -42,7 +42,7 @@ def get_doc_paragraphs(path, save_path):
 						'floor2': r'(\d? этаж \d?.*$)',
 						'floor3': r'(\d{1,2}эт)',
 						'reg_num': r'/?[0-9]{5,}/?',
-						'alphanum_code': r'[A-ZА-Я]\d{4,}',
+						'alphanum_code': r'[A-ZА-Я]\d{2,}',
 						# 'alphanum_code2': r'[A-ZА-Я]?\d+[A-ZА-Я]+\d+[A-ZА-Я]+)',
 						# 'period': r'\d{2}[.]\d{2}[.]\d{2,4}[ -]+\d{2}[.]\d{2}.\d{2}',
 						# 'date_time': r'\d{2}[.]\d{2}[.]\d{2,4}[ ]?\d{1,2}[:]\d{2}[:]?\d{2}?',
@@ -50,12 +50,13 @@ def get_doc_paragraphs(path, save_path):
 						'time_full': r'\d{1,2}[:]\d{2}[:]\d{2}',
 						'time': r'\d{1,2}[:]\d{2}',
 						'blood_pressure': r'\d{2,3}[\\]?[/]?\d{2,3} мм [рp]т[.]?[ ]?[сc]т[.]?',
-						'nums_with_sep': r'\d{1,3}.\d{1,3}',
+						'nums_with_sep': r'\d{1,3}\.\d{1,3}',
 						'FIO_short_double': r'[А-ЯЁ][а-яё]+[ ]+[А-ЯЁ]{2}[ \t\n\r.?!/$]+',
 						'FIO_short_with_space': r'[А-ЯЁ][а-яё]+\s+[А-ЯЁ]{1}[.]?[ ]+[А-ЯЁ]{1}[.]?[ \t\n\r.?!$]+',
 						'FIO_short_without_space': r'[А-ЯЁ][а-яё]+\s+[А-ЯЁ]{1}[.]?[А-ЯЁ]{1}[.]?[ \t\n\r.?!$]+',
 						'FIO_full': r'[А-ЯЁ][а-яё\-]+[ ]+[А-ЯЁ][а-яё\-]+[ ]*[А-ЯЁ][а-яё\-]+',
 						'abbreviation': r'[ ,.][А-ЯЁA-Z]{3,4}\b',
+						'place': r'>.+ Минздрава России'
 						}
 
 	block_separators = {
@@ -105,5 +106,5 @@ save_path = "docx_new.docx"
 paragraphs = get_doc_paragraphs(docx_path, save_path)
 print(len(paragraphs))
 
-for i in paragraphs:
-	print(i)
+# for i in paragraphs:
+# 	print(i)
