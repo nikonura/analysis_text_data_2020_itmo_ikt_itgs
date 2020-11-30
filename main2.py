@@ -42,7 +42,7 @@ def get_doc_paragraphs(path, save_path):
 						'floor2': r'(\d? этаж \d?.*$)',
 						'floor3': r'(\d{1,2}эт)',
 						'reg_num': r'/?[0-9]{5,}/?',
-						'alphanum_code': r'[A-ZА-Я]\d{4,}',
+						'alphanum_code': r'[A-ZА-Я]\d{2,}',
 						# 'alphanum_code2': r'[A-ZА-Я]?\d+[A-ZА-Я]+\d+[A-ZА-Я]+)',
 						# 'period': r'\d{2}[.]\d{2}[.]\d{2,4}[ -]+\d{2}[.]\d{2}.\d{2}',
 						# 'date_time': r'\d{2}[.]\d{2}[.]\d{2,4}[ ]?\d{1,2}[:]\d{2}[:]?\d{2}?',
@@ -50,12 +50,13 @@ def get_doc_paragraphs(path, save_path):
 						'time_full': r'\d{1,2}[:]\d{2}[:]\d{2}',
 						'time': r'\d{1,2}[:]\d{2}',
 						'blood_pressure': r'\d{2,3}[\\]?[/]?\d{2,3} мм [рp]т[.]?[ ]?[сc]т[.]?',
-						'nums_with_sep': r'\d{1,3}.\d{1,3}',
+						'nums_with_sep': r'\d{1,3}\.\d{1,3}',
 						'FIO_short_double': r'[А-ЯЁ][а-яё]+[ ]+[А-ЯЁ]{2}[ \t\n\r.?!/$]+',
 						'FIO_short_with_space': r'[А-ЯЁ][а-яё]+\s+[А-ЯЁ]{1}[.]?[ ]+[А-ЯЁ]{1}[.]?[ \t\n\r.?!$]+',
 						'FIO_short_without_space': r'[А-ЯЁ][а-яё]+\s+[А-ЯЁ]{1}[.]?[А-ЯЁ]{1}[.]?[ \t\n\r.?!$]+',
 						'FIO_full': r'[А-ЯЁ][а-яё\-]+[ ]+[А-ЯЁ][а-яё\-]+[ ]*[А-ЯЁ][а-яё\-]+',
 						'abbreviation': r'[ ,.][А-ЯЁA-Z]{3,4}\b',
+						'place': r'>.+ Минздрава России'
 						}
 
 	block_separators = {
@@ -70,19 +71,27 @@ def get_doc_paragraphs(path, save_path):
 
 	# Update header
 	for sec in document.sections:
-		for table in sec.header.tables:
-			for row in table.rows:
-				for cell in row.cells:
-					block, paragraphs = algorithm(cell, block_separators, block, paragraphs, word_matching_list)
+		if len(sec.header.paragraphs)==0:
+			for table in sec.header.tables:
+				for row in table.rows:
+					for cell in row.cells:
+						block, paragraphs = algorithm(cell, block_separators, block, paragraphs, word_matching_list)
+		else:
+			for para in sec.header.paragraphs:
+				block, paragraphs = algorithm(para, block_separators, block, paragraphs, word_matching_list)
 	if len(block) > 0:
 		paragraphs.append(block)
 
 	# Update footer
 	for sec in document.sections:
-		for table in sec.footer.tables:
-			for row in table.rows:
-				for cell in row.cells:
-					block, paragraphs = algorithm(cell, block_separators, block, paragraphs, word_matching_list)
+		if len(sec.footer.paragraphs)==0:
+			for table in sec.footer.tables:
+				for row in table.rows:
+					for cell in row.cells:
+						block, paragraphs = algorithm(cell, block_separators, block, paragraphs, word_matching_list)
+		else:
+			for para in sec.footer.paragraphs:
+				block, paragraphs = algorithm(para, block_separators, block, paragraphs, word_matching_list)
 	if len(block) > 0:
 		paragraphs.append(block)
 
@@ -98,12 +107,14 @@ def get_doc_paragraphs(path, save_path):
 
 
 # docx_path = "/home/nikon-cook/Documents/МИТМО/Analisys_TD/Med_karta_1_bez_personalnykh_dannykh.docx"
-# save_path = "/home/nikon-cook/Documents/МИТМО/Analisys_TD/docx_new.docx"
+# save_path = "/home/nikon-cook/Documents/МИТМО/Analisys_TD/Med_karta_1_bez_personalnykh_dannykh_new.docx"
 docx_path = "Med_karta_1_bez_personalnykh_dannykh.docx"
-save_path = "docx_new.docx"
+save_path = "Med_karta_1_bez_personalnykh_dannykh_new.docx"
+# docx_path = "medical_record.docx"
+# save_path = "medical_record_new.docx"
 
 paragraphs = get_doc_paragraphs(docx_path, save_path)
 print(len(paragraphs))
 
-for i in paragraphs:
-	print(i)
+# for i in paragraphs:
+# 	print(i)
