@@ -122,8 +122,8 @@ def get_doc_paragraphs(path, save_path):
 
 
 # filename options
-# option = "Med_karta_1_bez_personalnykh_dannykh"
-option = "Med_karta_2"
+option = "Med_karta_1_bez_personalnykh_dannykh"
+# option = "Med_karta_2"
 
 # docx_path = "/home/nikon-cook/Documents/МИТМО/Analisys_TD/Med_karta_1_bez_personalnykh_dannykh.docx"
 # save_path = "/home/nikon-cook/Documents/МИТМО/Analisys_TD/Med_karta_1_bez_personalnykh_dannykh_new.docx"
@@ -155,9 +155,16 @@ print()
 
 # F-мера для карты 2
 
-fp = 1  # Соли Ж.К.
-fn = 2  # Даты в формате d.mm или dd.mm
-tp = len(changes.keys()) - fp  # 35
+if option == "Med_karta_2":
+	fp = 1  # Соли Ж.К.
+	fn = 2  # Даты в формате d.mm или dd.mm
+	tp = len(changes.keys()) - fp  # 35
+
+elif option == "Med_karta_1_bez_personalnykh_dannykh":
+	fp = 94
+	fn = 73
+	tp = len(changes.keys()) - fp  # 2858
+
 
 recall = tp / (tp + fn)
 precision = tp / (tp + fp)
